@@ -1,0 +1,21 @@
+name = "mastra-chatai-02"
+main = "src/index.ts"
+compatibility_date = "2024-07-12"
+node_compat = true
+
+[vars]
+ENVIRONMENT = "development"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "chatai-db"
+database_id = "your-database-id"
+
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "chatai-vectors"
+
+[env.production]
+name = "mastra-chatai-02-prod"
+[env.production.vars]
+ENVIRONMENT = "production"
