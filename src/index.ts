@@ -8,7 +8,6 @@ export interface Env {
   DB: D1Database;
   VECTORIZE_INDEX: VectorizeIndex;
   OPENAI_API_KEY: string;
-  ANTHROPIC_API_KEY: string;
   WEATHER_API_KEY: string;
 }
 
@@ -39,17 +38,25 @@ app.get('/', (c) => {
         .post { background: #49cc90; color: white; }
         code { background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }
         .footer { text-align: center; margin-top: 2rem; color: #666; }
+        .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
       </style>
     </head>
     <body>
       <div class="header">
         <h1>🤖 Mastra ChatAI API</h1>
-        <p>基于 Mastra、LLM、RAG 技术的智能聊天工具后端服务</p>
+        <p>基于 OpenAI GPT 的智能聊天工具后端服务</p>
+      </div>
+      
+      <div class="notice">
+        <h3>💡 简化版本说明</h3>
+        <p><strong>已移除 Anthropic Claude 依赖</strong> - 现在只需要 OpenAI API Key 即可使用所有功能！</p>
+        <p>知识问答和普通对话都使用 OpenAI GPT 模型。</p>
       </div>
       
       <div class="status">
         <h3>✅ 服务状态：运行中</h3>
         <p>时间：${new Date().toLocaleString('zh-CN')}</p>
+        <p>只需配置：OpenAI API Key + 天气 API Key（可选）</p>
       </div>
       
       <h2>🔗 API 端点</h2>
@@ -96,6 +103,7 @@ app.get('/', (c) => {
       <div class="footer">
         <p>📚 <a href="https://github.com/ljj0607/mastra-chatai-02" target="_blank">项目文档</a> | 
         🐛 <a href="https://github.com/ljj0607/mastra-chatai-02/issues" target="_blank">问题反馈</a></p>
+        <p><strong>配置提示：</strong>只需在 .env 中设置 OPENAI_API_KEY 即可使用所有AI功能</p>
       </div>
       
       <script>
@@ -171,7 +179,8 @@ app.get('/health', (c) => {
     version: '1.0.0',
     services: {
       api: 'healthy',
-      graphql: 'healthy'
+      graphql: 'healthy',
+      ai_provider: 'OpenAI GPT'
     }
   });
 });
@@ -214,6 +223,7 @@ app.get('/api', (c) => {
   return c.json({
     name: 'Mastra ChatAI API',
     version: '1.0.0',
+    ai_provider: 'OpenAI GPT',
     endpoints: {
       graphql: '/graphql',
       health: '/health',
