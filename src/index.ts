@@ -21,6 +21,9 @@ app.use('*', cors({
 
 // 首页 - 显示API信息
 app.get('/', (c) => {
+  const hasOpenAIKey = c.env?.OPENAI_API_KEY && c.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
+  const hasWeatherKey = c.env?.WEATHER_API_KEY && c.env.WEATHER_API_KEY !== 'your_weather_api_key_here';
+  
   return c.html(`
     <!DOCTYPE html>
     <html lang="zh">
@@ -32,13 +35,18 @@ app.get('/', (c) => {
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
         .header { text-align: center; margin-bottom: 2rem; }
         .status { background: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+        .info { background: #d1ecf1; border: 1px solid #17a2b8; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
         .endpoint { background: #f5f5f5; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
         .method { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
         .get { background: #61affe; color: white; }
         .post { background: #49cc90; color: white; }
         code { background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }
         .footer { text-align: center; margin-top: 2rem; color: #666; }
-        .notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+        .config-status { display: flex; gap: 1rem; margin: 1rem 0; }
+        .config-item { flex: 1; padding: 0.5rem; border-radius: 4px; text-align: center; }
+        .config-ok { background: #d4edda; color: #155724; }
+        .config-missing { background: #f8d7da; color: #721c24; }
       </style>
     </head>
     <body>
@@ -47,17 +55,39 @@ app.get('/', (c) => {
         <p>基于 OpenAI GPT 的智能聊天工具后端服务</p>
       </div>
       
-      <div class="notice">
-        <h3>💡 简化版本说明</h3>
-        <p><strong>已移除 Anthropic Claude 依赖</strong> - 现在只需要 OpenAI API Key 即可使用所有功能！</p>
-        <p>知识问答和普通对话都使用 OpenAI GPT 模型。</p>
-      </div>
-      
       <div class="status">
         <h3>✅ 服务状态：运行中</h3>
         <p>时间：${new Date().toLocaleString('zh-CN')}</p>
-        <p>只需配置：OpenAI API Key + 天气 API Key（可选）</p>
+        <p>GraphQL端点可用，所有API正常工作</p>
       </div>
+      
+      <div class="info">
+        <h3>🔧 配置状态</h3>
+        <div class="config-status">
+          <div class="config-item ${hasOpenAIKey ? 'config-ok' : 'config-missing'}">
+            <strong>OpenAI API</strong><br>
+            ${hasOpenAIKey ? '✅ 已配置' : '❌ 使用模拟数据'}
+          </div>
+          <div class="config-item ${hasWeatherKey ? 'config-ok' : 'config-missing'}">
+            <strong>天气 API</strong><br>
+            ${hasWeatherKey ? '✅ 已配置' : '❌ 使用模拟数据'}
+          </div>
+        </div>
+        ${!hasOpenAIKey || !hasWeatherKey ? 
+          '<p><strong>提示：</strong>没有API Key也能正常使用！所有功能都有模拟数据支持。</p>' : ''}
+      </div>
+      
+      ${!hasOpenAIKey || !hasWeatherKey ? `
+      <div class="warning">
+        <h3>⚠️ 开发环境提示</h3>
+        <p>控制台中的警告是正常的：</p>
+        <ul>
+          <li><strong>Weather API error: 401</strong> - 天气API Key未配置，正在使用模拟数据</li>
+          <li><strong>Vectorize local bindings not supported</strong> - 向量数据库在本地开发时的正常警告</li>
+        </ul>
+        <p>这些不影响功能使用，所有API都会返回合理的模拟数据。</p>
+      </div>
+      ` : ''}
       
       <h2>🔗 API 端点</h2>
       
@@ -103,7 +133,7 @@ app.get('/', (c) => {
       <div class="footer">
         <p>📚 <a href="https://github.com/ljj0607/mastra-chatai-02" target="_blank">项目文档</a> | 
         🐛 <a href="https://github.com/ljj0607/mastra-chatai-02/issues" target="_blank">问题反馈</a></p>
-        <p><strong>配置提示：</strong>只需在 .env 中设置 OPENAI_API_KEY 即可使用所有AI功能</p>
+        <p><strong>配置API Keys：</strong>编辑 .env 文件添加真实API Key即可使用真实AI服务</p>
       </div>
       
       <script>
@@ -159,7 +189,6 @@ app.get('/', (c) => {
 
 // Favicon处理
 app.get('/favicon.ico', (c) => {
-  // 返回一个简单的SVG图标
   const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     <circle cx="32" cy="32" r="30" fill="#2196f3"/>
     <text x="32" y="42" text-anchor="middle" fill="white" font-size="32" font-family="sans-serif">🤖</text>
@@ -173,6 +202,9 @@ app.get('/favicon.ico', (c) => {
 
 // 健康检查
 app.get('/health', (c) => {
+  const hasOpenAIKey = c.env?.OPENAI_API_KEY && c.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
+  const hasWeatherKey = c.env?.WEATHER_API_KEY && c.env.WEATHER_API_KEY !== 'your_weather_api_key_here';
+  
   return c.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -181,6 +213,11 @@ app.get('/health', (c) => {
       api: 'healthy',
       graphql: 'healthy',
       ai_provider: 'OpenAI GPT'
+    },
+    configuration: {
+      openai_configured: hasOpenAIKey,
+      weather_configured: hasWeatherKey,
+      mode: hasOpenAIKey ? 'production' : 'development_with_mocks'
     }
   });
 });
