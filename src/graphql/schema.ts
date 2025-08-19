@@ -1,4 +1,3 @@
-import { buildSchema } from 'graphql';
 import { resolvers } from './resolvers';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 
@@ -19,14 +18,10 @@ const typeDefs = `
     addKnowledge(input: AddKnowledgeInput!): KnowledgeItem!
   }
   
-  type Subscription {
-    messageAdded(conversationId: String!): Message!
-  }
-  
   input SendMessageInput {
     conversationId: String!
     content: String!
-    type: MessageType = TEXT
+    type: MessageType
   }
   
   input AddKnowledgeInput {
