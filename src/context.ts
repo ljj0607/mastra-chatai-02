@@ -16,13 +16,14 @@ export interface AppContext {
 export function createContext(c: Context<{ Bindings: Env }>): AppContext {
   const env = c.env;
   
-  const databaseService = new DatabaseService(env.DB);
-  const ragService = new RAGService(env.VECTORIZE_INDEX);
-  const chatService = new ChatService(env, ragService);
-  const weatherService = new WeatherService(env);
+  // 创建mock服务用于本地开发
+  const databaseService = new DatabaseService(env?.DB);
+  const ragService = new RAGService(env?.VECTORIZE_INDEX);
+  const chatService = new ChatService(env || {}, ragService);
+  const weatherService = new WeatherService(env || {});
   
   return {
-    env,
+    env: env || {},
     chatService,
     weatherService,
     ragService,
